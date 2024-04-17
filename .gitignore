@@ -126,3 +126,10 @@ venv.bak/
 dmypy.json
 
 /utilities/receipts/
+
+# credentials
+credentials.json
+
+#temp files
+/src/utilities/documents/*.pdf
+/src/utilities/credentials/*.jpg

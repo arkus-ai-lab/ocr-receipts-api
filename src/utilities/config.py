@@ -1,0 +1,4 @@
+import os
+
+CREDENTIALS = os.getenv("HUGGINGFACE_ACCESS_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

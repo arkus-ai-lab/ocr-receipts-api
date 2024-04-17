@@ -1,17 +1,24 @@
 from rest_framework import status, generics
 from rest_framework.response import Response
 import logging
+from rest_framework.parsers import MultiPartParser, FormParser
+
+from ocr_text.api.serializers import Receipt
+
 class OCRTextView(generics.GenericAPIView):
     """   
         Handle POST Adds a new source to the OCR Text API.
                             
     """
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = Receipt
     
     def post(self, request,*args, **kwargs):
-        try:
-            source = add_ocr_source()
-            return Response(source, status=status.HTTP_200_OK)   
-        except Exception as e:            
-            logging.exception("Unexpected error occurred when adding new resource.")
-            return Response({"detail": " An unexpected error occurred, " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
-
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
