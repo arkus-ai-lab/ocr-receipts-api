@@ -1,66 +1,52 @@
+import logging
 import os
 from google.cloud import documentai
 from google.api_core.client_options import ClientOptions
 from openai import OpenAI
-import pdf2image
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
 
-
 class DocumentAI:
-    def __init__(self, project_id, location, processor_id, endpoint, directories):
-
+    def __init__(self, project_id, location, processor_id, endpoint):
         self.project_id = project_id
         self.location = location
         self.processor_id = processor_id
-        self.endpoint = endpoint
-        self.documents_path = directories[0]
-        self.converted_path = directories[1]
+        self.endpoint = endpoint        
 
     def get_documents(self):
-        documents = []
-        for document in os.listdir(self.documents_path):
+        docs_path = []
+        for document in os.listdir('utilities/documents/'):
             if document.endswith(".pdf"):
-                document_path = os.path.join(self.documents_path, document)
-                document = self.process_document(document_path, self.project_id, self.location, self.processor_id, self.endpoint)
-                documents.append(document)
-        return documents
+                complete_path = os.path.join('utilities/documents/', document)
+                docs_path.append(complete_path) 
+        print(docs_path)        
+        return docs_path    
+   
+
+    def extract_text(self, docs_path):
+        try:
+            mime_type = 'application/pdf'
+            client = documentai.DocumentProcessorServiceClient(
+                client_options=ClientOptions(api_endpoint=self.endpoint))
+            name =  client.processor_path(self.project_id, self.location, self.processor_id)
+            with open(docs_path, "rb") as image:
+                image_content = image.read()
+
+            raw_document = documentai.RawDocument(
+                content=image_content, mime_type=mime_type)
+            
+            request = documentai.ProcessRequest(
+                name=name,
+                raw_document=raw_document)
+            response = client.process_document(request=request)
+            document = response.document
+            
+            return document.text
+        except Exception as e:
+            logging.error(e)
+            return None
     
-    def convert_documents_to_jpg(self, documents):
-        for document in documents:
-            complete_path = os.path.join(self.documents_path, document)
-            jpg_save_path = os.path.join(self.converted_path, document[:-4])
-            pages = pdf2image.convert_from_path(complete_path, 500)
-            for i, page in enumerate(pages):
-                page.save(f'{jpg_save_path}_{i}.jpg', 'JPEG')
-
-    def get_images(self):
-        images = []
-        for image in os.listdir(self.converted_path):
-            if image.endswith(".jpg"):
-                image_path = os.path.join(self.converted_path, image)
-                images.append(image_path)
-        return images
-
-    def extract_text(self, complete_path, project_id, location, processor_id, endpoint):
-        mime_type = "image/jpeg"
-        client = documentai.DocumentProcessorServiceClient(
-            client_options=ClientOptions(api_endpoint=f"{location}-{endpoint}"))
-        name =  client.processor_path(project_id, location, processor_id)
-        with open(complete_path, "rb") as image:
-            image_content = image.read()
-
-        raw_document = documentai.RawDocument(
-            content=image_content, mime_type=mime_type)
-        
-        request = documentai.ProcessRequest(
-            name=name,
-            raw_document=raw_document)
-        response = client.process_document(request=request)
-        document = response.document
-        return document
-    
-    def get_document_info(self, document):
+    def get_document_info(self, text):
         try:
             completion = self.openai.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -75,7 +61,7 @@ class DocumentAI:
                     +"Date of the ticket,"
                     +"Amount of the ticket,"
                     +"This is the text extracted from the document:"
-                    +f"{document.text}"},
+                    +f"{text}"},
                     ],
                 )
             result = completion.choices[0].message.content

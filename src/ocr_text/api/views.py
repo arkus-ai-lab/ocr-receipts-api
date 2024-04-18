@@ -4,7 +4,7 @@ import logging
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from ocr_text.api.serializers import Receipt
-from utilities.document_ai import get_documents
+from utilities.process_documents import process_documents
 
 class OCRTextView(generics.GenericAPIView):
     """   
@@ -16,12 +16,14 @@ class OCRTextView(generics.GenericAPIView):
     
     def post(self, request,*args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            documents = get_documents()
-
-            return Response(documents, status=status.HTTP_201_CREATED)
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        try:
+            if serializer.is_valid():
+                serializer.save()
+                process_documents()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:            
+            logging.exception("Unexpected error occurred when adding RAG resources.")
+            return Response({"detail": " An unexpected error occurred, " + str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+            
+            
+            
