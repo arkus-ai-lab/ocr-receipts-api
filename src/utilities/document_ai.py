@@ -17,9 +17,9 @@ class DocumentAI:
 
     def get_documents(self):
         docs_path = []
-        for document in os.listdir('utilities/documents/'):
+        for document in os.listdir('src/utilities/documents/'):
             if document.endswith(".pdf"):
-                complete_path = os.path.join('utilities/documents/', document)
+                complete_path = os.path.join('src/utilities/documents/', document)
                 docs_path.append(complete_path) 
         print(docs_path)        
         return docs_path    
@@ -55,7 +55,7 @@ class DocumentAI:
             messages=[
                     {"role": "system", "content": "You are a helpful assistant that helps people with their documents. "
                     +"Essentially with the information extracted from the document, you can help the user with their queries,"
-                    +" be carefully with the information, the user only need a array of jsons with the next fields 'Name', 'Date' and 'Ammount', 'RFC'"
+                    +" be carefully with the information, the user only need a array of jsons with the next fields 'Name' (Account holder) , 'RFC' (Account Holder), 'Account', 'Date', 'Ammount', 'CurrencyType and the 'Issuer' "
                     +" without explanations, just that info. Also, if you detect that the document have 2 tickets or more please add the info of all of them."
                     +"If the document is not visible or is not a ticket, please let the user know returning this message 'Please check the information of the ticket' ."},
                     {"role": "user", "content": "Please provide a json with the next fields:"

@@ -16,7 +16,8 @@ def process_documents():
         for document in documents:
             document_text = documents_manager.extract_text(document)
             relevant_info = documents_manager.get_document_info(document_text)
-
+        
+        print(document_text)
         print(relevant_info)
     except Exception as e:
         logging.error(e)
