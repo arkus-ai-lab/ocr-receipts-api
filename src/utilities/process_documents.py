@@ -15,10 +15,10 @@ def process_documents():
         document_text = ''
         for document in documents:
             document_text = documents_manager.extract_text(document)
-        
-        print(document_text)
-            # relevant_info = documents_manager.get_document_info(document)
+            relevant_info = documents_manager.get_document_info(document_text)
+
+        print(relevant_info)
     except Exception as e:
         logging.error(e)
         return None
-    return document_text
+    return relevant_info
