@@ -19,10 +19,10 @@ class OCRTextView(generics.GenericAPIView):
         try:
             if serializer.is_valid():
                 serializer.save()
-                process_documents()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                json_data = process_documents()
+                return Response(json_data, status=status.HTTP_200_OK)
         except Exception as e:            
-            logging.exception("Unexpected error occurred when adding RAG resources.")
+            logging.exception("Unexpected error occurred when adding resources.")
             return Response({"detail": " An unexpected error occurred, " + str(e)}, status=status.HTTP_400_BAD_REQUEST) 
             
             
