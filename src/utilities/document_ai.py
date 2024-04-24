@@ -5,6 +5,7 @@ from google.cloud import documentai
 from google.api_core.client_options import ClientOptions
 from openai import OpenAI
 from utilities.config import OPENAI_API_KEY
+import json 
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
 CLIENT = OpenAI(api_key= OPENAI_API_KEY)
@@ -77,7 +78,7 @@ class DocumentAI:
                         "role": "user",
                         "content": f"Organize the extracted information into the specified JSON structure from the document text: "
                                 f"'type' set to 'spei', "
-                                f"'date'(YYYY-MM-DD), "
+                                f"'date' (change format from d month yyyy to YYYY-MM-DD), "
                                 f"'amount'(Just number), "
                                 f"'ammount_letter', "
                                 f"'reference', "
@@ -120,3 +121,11 @@ class DocumentAI:
             return result
         except Exception as e:
             print(e)
+    
+    
+
+    def string_to_json(self,json_string):
+        try:
+            return json.loads(json_string)
+        except json.JSONDecodeError as e:
+            return f"Error decoding JSON: {e}"
