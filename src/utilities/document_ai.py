@@ -78,13 +78,13 @@ class DocumentAI:
                         "role": "user",
                         "content": f"Organize the extracted information into the specified JSON structure from the document text: "
                                 f"'type' set to 'spei', "
-                                f"'date' (change format from d month yyyy to YYYY-MM-DD), "
+                                f"'date (date of credit in the beneficiary account and change format from d month yyyy to YYYY-MM-DD) , "
                                 f"'amount'(Just number), "
                                 f"'ammount_letter', "
-                                f"'reference', "
+                                f"'reference' ('reference is Number reference' not the 'Concept of payment'), "
                                 f"'currency', "
-                                f"'ordering_party' with fields 'name', 'rfc', 'account', and 'issuer' (bank name), "
-                                f"'beneficiary_party' with fields 'name', 'rfc', 'account', and 'receiver' (bank name). "
+                                f"'ordering_party' with fields 'name (name of the Account holder)', 'rfc (rfc of ordering party)', 'account (which is the CLABE/IBAN of the person who ordered the ticket)', and 'issuer' (bank name), "
+                                f"'beneficiary_party' with fields 'name (beneficiary name)', 'rfc (rfc of beneficiary)', 'account (beneficiary CLABE/IBAN)', and 'receiver' (bank name). "
                                 f"This is the text extracted from the document: {text}"
                     },
                 ]
