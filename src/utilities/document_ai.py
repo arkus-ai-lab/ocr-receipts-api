@@ -67,29 +67,27 @@ class DocumentAI:
     def get_spei_info(self, text):
         try:
             completion = CLIENT.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                    {"role": "system", "content": "You are an assistant that extract information from a document which is written in Spanish."
-                     +"You have to extract the following information:"
-                     +" 1. 'Name' (Ordering party), "
-                     +" 2. 'RFC' (Ordering party), "
-                     +" 3. 'CLABE'(Ordering party), "
-                     +" 4. 'Date', "
-                     +" 5. 'Amount', "
-                     +" 6. 'Currency' "
-                     +" 7. 'Issuer'."},  
-                     {"role": "user", "content": "Please provide a json with the next fields:"
-                        +"'Name' of the person who ordered the ticket,"
-                        +"'RFC' of the person who ordered the ticket,"
-                        +"'Account' which is the CLABE/IBAN of the person who ordered the ticket,"
-                        +"'Date' of the ticket,"
-                        +"'Amount' of the ticket,"
-                        +"'Currency' of the ticket, which might be 'MXN' or 'USD',"
-                        +"'Issuer' of the ticket."
-                        +"This is the text extracted from the document:"
-                        +f"{text}"},
-                    ],
-                )
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish documents into JSON format. for both the ordering and beneficiary parties. be carefully with all fields."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted information into the specified JSON structure from the document text: "
+                                f"'type' set to 'spei', "
+                                f"'date'(YYYY-MM-DD), "
+                                f"'amount'(Just number), "
+                                f"'ammount_letter', "
+                                f"'reference', "
+                                f"'currency', "
+                                f"'ordering_party' with fields 'name', 'rfc', 'account', and 'issuer' (bank name), "
+                                f"'beneficiary_party' with fields 'name', 'rfc', 'account', and 'receiver' (bank name). "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
             result = completion.choices[0].message.content
             print(result)
             return result
@@ -101,25 +99,20 @@ class DocumentAI:
             completion = CLIENT.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                    {"role": "system", "content": "You are a helpful assistant that helps people with their eTransactions. "
-                    +"Essentially with the information extracted from the screenshots, you can help the user with their queries,"
-                    +" be carefully with the information, the user only need a array of jsons with the next fields: "
-                    +"'Name' (Account holder) , "
-                    +"'RFC' (Account Holder), "
-                    +"'Account', "
-                    +"'Date', "
-                    +"'Ammount', "
-                    +"'CurrencyType and "
-                    +"the 'Issuer', "
-                    +"if you don't detect some fields put 'None' in the field. "
-                    +" without explanations, just that info. Also, if you detect that the document have 2 screenshots or more please add the info of all of them."
-                    +"If the document is not visible or is not a ticket, please let the user know returning this message 'Please check the information of the ticket' ."},
-                    {"role": "user", "content": "Please provide a json with the next fields:"
-                    +"Name of the person who issued the ticket,"
-                    +"Date of the ticket,"
-                    +"Amount of the ticket,"
-                    +"This is the text extracted from the document:"
-                    +f"{result}"},
+                    {"role": "system", 
+                     "content": f"You are a helpful assistant that helps people with their eTransactions. "
+                                f"Essentially with the information extracted from the screenshots, you can help the user with their queries,"
+                                f" be carefully with the information, the user only need a array of jsons with the next fields: "
+                                f"'type' set to 'eTransaction', "
+                                f"'date' (YYYY-MM-DD), "
+                                f"'amount', "
+                                f"'ammount_letter', "
+                                f"'reference', "
+                                f"'currency', "
+                                f"'ordering_party' with fields 'name', 'rfc', 'account' (If the account has only the las 4 numbersm, take it), and 'issuer' (bank name), "
+                                f"'beneficiary_party' with fields 'name', 'rfc', 'account' (If the account has only the las 4 numbersm, take it), and 'receiver' (bank name). "
+                                f"This is the text extracted from the document: {result}"
+                    },
                     ],
                 )
             result = completion.choices[0].message.content
