@@ -171,4 +171,11 @@ class DocumentAI:
                     self.reverse_account_numbers(json_obj)
                     return json_obj
             else:
-                print(f"{key}: {value}") 
+                print(f"{key}: {value}")
+
+    def drop_processed_documents(self):
+        for document in os.listdir('utilities/documents/'):
+            if document.endswith(".pdf"):
+                complete_path = os.path.join('utilities/documents/', document)
+                os.remove(complete_path) 
+        return None 

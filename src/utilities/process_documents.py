@@ -18,6 +18,7 @@ def process_documents():
             string_data = documents_manager.choose_ticket(document_text)
             string_data_without_delimiters = documents_manager.remove_code_block_delimiters(string_data)
             json_data = documents_manager.string_to_json(string_data_without_delimiters)
+            documents_manager.drop_processed_documents()
                   
         print(json_data)
     except Exception as e:
