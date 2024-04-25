@@ -6,6 +6,7 @@ from google.api_core.client_options import ClientOptions
 from openai import OpenAI
 from utilities.config import OPENAI_API_KEY
 import json 
+import re
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
 CLIENT = OpenAI(api_key= OPENAI_API_KEY)
@@ -108,22 +109,23 @@ class DocumentAI:
         try:
             completion = CLIENT.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[
-                    {"role": "system", 
-                     "content": f"You are a helpful assistant that helps people with their eTransactions. "
-                                f"Essentially with the information extracted from the screenshots, you can help the user with their queries,"
-                                f" be carefully with the information, the user only need a array of jsons with the next fields: "
-                                f"'type' set to 'eTransaction', "
-                                f"'date' (YYYY-MM-DD), "
-                                f"'amount', "
-                                f"'ammount_letter', "
-                                f"'reference', "
-                                f"'currency', "
-                                f"'ordering_party' with fields 'name', 'rfc', 'account' (If the account has only the las 4 numbersm, take it), and 'issuer' (bank name), "
-                                f"'beneficiary_party' with fields 'name', 'rfc', 'account' (If the account has only the las 4 numbersm, take it), and 'receiver' (bank name). "
-                                f"This is the text extracted from the document: {result}"
-                    },
-                    ],
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an assistant specialized in handling electronic transactions. "
+                        "Your role is to distinguish between the ordering party and the beneficiary party. "
+                        "Using the information extracted from the provided screenshots, you will assist the user with their queries. "
+                        "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
+                        "(if any field is unknown, use 'NA'): 'type' set to 'eTransaction', 'date' (format: YYYY-MM-DD), "
+                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference', 'currency', 'ordering_party' "
+                        "(origin account) including 'name' (NA), 'rfc', 'account' (if only the last four numbers are available, use them, is the origin account), "
+                        "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (the name of receipt), "
+                        "'rfc', 'account' (if only the last four numbers are available, use them, it's closer of the receipt name), and 'receiver' (bank name). "
+                        f"This is the text extracted from the document: {result}"
+                    )
+                },
+            ]
                 )
             result = completion.choices[0].message.content
             print(result)
@@ -138,3 +140,35 @@ class DocumentAI:
             return json.loads(json_string)
         except json.JSONDecodeError as e:
             return f"Error decoding JSON: {e}"
+        
+    def remove_code_block_delimiters(self, json_string):
+        clean_string = re.sub(r'```json|```', '', json_string)
+        print(clean_string)
+        return clean_string
+
+    def reverse_account_numbers(self, json_data):
+        try:
+            for transaction in json_data:
+                if ("ordering_party" in transaction and "account" in transaction["ordering_party"]) and \
+                   ("beneficiary_party" in transaction and "account" in transaction["beneficiary_party"]):
+                    temp_account = transaction["ordering_party"]["account"]
+                    transaction["ordering_party"]["account"] = transaction["beneficiary_party"]["account"]
+                    transaction["beneficiary_party"]["account"] = temp_account
+                else:
+                    logging.error("Missing 'ordering_party'/'beneficiary_party' or 'account' field in transaction.")
+
+            return json_data
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            return None
+        
+    def iterate_nested_json_for_loop(self,json_obj):
+        for key, value in json_obj.items():
+            if isinstance(value, dict):
+                self.iterate_nested_json_for_loop(value)
+                if key == 'eTransaction':
+                    self.reverse_account_numbers(json_obj)
+                    return json_obj
+            else:
+                print(f"{key}: {value}") 

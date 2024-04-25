@@ -16,7 +16,9 @@ def process_documents():
         for document in documents:
             document_text = documents_manager.extract_text(document)
             string_data = documents_manager.choose_ticket(document_text)
-            json_data = documents_manager.string_to_json(string_data)        
+            string_data_without_delimiters = documents_manager.remove_code_block_delimiters(string_data)
+            json_data = documents_manager.string_to_json(string_data_without_delimiters)
+                  
         print(json_data)
     except Exception as e:
         logging.error(e)
