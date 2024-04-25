@@ -72,19 +72,28 @@ class DocumentAI:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an assistant that extracts and structures data from Spanish documents into JSON format. for both the ordering and beneficiary parties. be carefully with all fields."
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields."
                     },
                     {
                         "role": "user",
-                        "content": f"Organize the extracted information into the specified JSON structure from the document text: "
-                                f"'type' set to 'spei', "
-                                f"'date (date of credit in the beneficiary account and change format from d month yyyy to YYYY-MM-DD) , "
-                                f"'amount'(Just number), "
-                                f"'ammount_letter', "
-                                f"'reference' ('reference is Number reference' not the 'Concept of payment'), "
-                                f"'currency', "
-                                f"'ordering_party' with fields 'name (name of the Account holder)', 'rfc (rfc of ordering party)', 'account (which is the CLABE/IBAN of the person who ordered the ticket)', and 'issuer' (bank name), "
-                                f"'beneficiary_party' with fields 'name (beneficiary name)', 'rfc (rfc of beneficiary)', 'account (beneficiary CLABE/IBAN)', and 'receiver' (bank name). "
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'spei', "
+                                f"'date': 'Date of credit to the beneficiary account' (change format from d month yyyy to YYYY-MM-DD), "
+                                f"'amount': (just number), "
+                                f"'ammount_letter':(for example: 'cien mil pesos'), "
+                                f"'reference': 'reference' is Numeric reference' and NOT the 'Concept of payment',  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': (Account holder of the ordering party, please do not include the name of 'Issuing institution of the payment')', "
+                                f"  'rfc': 'RFC/CURP' of the ordering party (person's RFC or CURP), " 
+                                f"  'account': '(which is the CLABE/IBAN of ordering party)', "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': beneficiary name, "
+                                f"  'rfc': 'RFC/CURP' of beneficiary bank, "
+                                f"  'account': (beneficiary CLABE/IBAN)', "
+                                f"  'receiver': beneficiary bank name, "
                                 f"This is the text extracted from the document: {text}"
                     },
                 ]
