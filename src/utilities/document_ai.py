@@ -19,13 +19,17 @@ class DocumentAI:
         self.endpoint = endpoint        
 
     def get_documents(self):
-        docs_path = []
-        for document in os.listdir('utilities/documents/'):
-            if document.endswith(".pdf"):
-                complete_path = os.path.join('utilities/documents/', document)
-                docs_path.append(complete_path) 
-        print(docs_path)        
-        return docs_path    
+        try:
+            docs_path = []
+            for document in os.listdir('utilities/documents/'):
+                if document.endswith(".pdf"):
+                    complete_path = os.path.join('utilities/documents/', document)
+                    docs_path.append(complete_path) 
+            print(docs_path)        
+            return docs_path
+        except Exception as e:
+            logging.error(e)
+            return logging.error("No documents found in the directory.")    
    
 
     def extract_text(self, docs_path):
@@ -49,7 +53,7 @@ class DocumentAI:
             return document.text
         except Exception as e:
             logging.error(e)
-            return None
+            return logging.error("An error occurred while extracting text from the document.")
         
     def choose_ticket(self,text):
         try:
@@ -60,11 +64,15 @@ class DocumentAI:
             return self.get_etransaction_info(text)
         except Exception as e:
             logging.error(e)
-            return None
+            return logging.error("An error occurred while choosing the ticket.")
     
-    def remove_accents(self,input_str):        
-        nfkd_form = unicodedata.normalize('NFKD', input_str)
-        return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    def remove_accents(self,input_str): 
+        try:       
+            nfkd_form = unicodedata.normalize('NFKD', input_str)
+            return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while removing accents.")
 
     def get_spei_info(self, text):
         try:
@@ -103,7 +111,8 @@ class DocumentAI:
             print(result)
             return result
         except Exception as e:
-            print(e)
+            logging.error(e)
+            return logging.error("An error occurred while getting the SPEI information.")
 
     def get_etransaction_info(self, result):
         try:
@@ -131,7 +140,8 @@ class DocumentAI:
             print(result)
             return result
         except Exception as e:
-            print(e)
+            logging.error(e)
+            return logging.error("An error occurred while getting the eTransaction information.")
     
     
 
@@ -142,9 +152,13 @@ class DocumentAI:
             return f"Error decoding JSON: {e}"
         
     def remove_code_block_delimiters(self, json_string):
-        clean_string = re.sub(r'```json|```', '', json_string)
-        print(clean_string)
-        return clean_string
+        try:
+            clean_string = re.sub(r'```json|```', '', json_string)
+            print(clean_string)
+            return clean_string
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while removing code block delimiters.")
 
     def reverse_account_numbers(self, json_data):
         try:
@@ -156,7 +170,6 @@ class DocumentAI:
                     transaction["beneficiary_party"]["account"] = temp_account
                 else:
                     logging.error("Missing 'ordering_party'/'beneficiary_party' or 'account' field in transaction.")
-
             return json_data
 
         except Exception as e:
@@ -164,18 +177,26 @@ class DocumentAI:
             return None
         
     def iterate_nested_json_for_loop(self,json_obj):
-        for key, value in json_obj.items():
-            if isinstance(value, dict):
-                self.iterate_nested_json_for_loop(value)
-                if key == 'eTransaction':
-                    self.reverse_account_numbers(json_obj)
-                    return json_obj
-            else:
-                print(f"{key}: {value}")
+        try:
+            for key, value in json_obj.items():
+                if isinstance(value, dict):
+                    self.iterate_nested_json_for_loop(value)
+                    if key == 'eTransaction':
+                        self.reverse_account_numbers(json_obj)
+                        return json_obj
+                else:
+                    print(f"{key}: {value}")
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while iterating the nested JSON for loop.")
 
     def drop_processed_documents(self):
-        for document in os.listdir('utilities/documents/'):
-            if document.endswith(".pdf"):
-                complete_path = os.path.join('utilities/documents/', document)
-                os.remove(complete_path) 
-        return None 
+        try:
+            for document in os.listdir('utilities/documents/'):
+                if document.endswith(".pdf"):
+                    complete_path = os.path.join('utilities/documents/', document)
+                    os.remove(complete_path) 
+            return None
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while dropping processed documents.") 
