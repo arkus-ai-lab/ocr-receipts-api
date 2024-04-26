@@ -1,11 +1,13 @@
 import os
+from dotenv import load_dotenv
 
-CREDENTIALS = os.getenv("HUGGINGFACE_ACCESS_TOKEN")
+load_dotenv()
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 PROJECT_SETUP = {
-    "project_id": "change-me",
+    "project_id": os.getenv("PROJECT_ID"),
     "location": "us",
-    "processor_id": "change-me",
+    "processor_id": os.getenv("PROCESSOR_ID"),
     "endpoint": "us-documentai.googleapis.com",     
 }

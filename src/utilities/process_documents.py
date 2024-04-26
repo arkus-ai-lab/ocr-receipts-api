@@ -23,5 +23,5 @@ def process_documents():
         print(json_data)
     except Exception as e:
         logging.error(e)
-        return None
+        return logging.error("An error occurred while processing the documents.")
     return json_data
