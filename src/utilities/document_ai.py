@@ -64,6 +64,8 @@ class DocumentAI:
             return self.get_etransaction_info(text)
           elif 'Comprobante de Operacion' in text:          
             return self.get_bank_receipt_info(text)
+          elif 'BANCO/CLIENTE' in text:
+            return self.get_bank_customer_checking_deposit(text)
         except Exception as e:
             logging.error(e)
             return logging.error("An error occurred while choosing the ticket.")
@@ -145,7 +147,7 @@ class DocumentAI:
             logging.error(e)
             return logging.error("An error occurred while getting the eTransaction information.")
     
-    def get_bank_receipt_info(self, text):
+    def get_proof_operation(self, text):
         try:
             completion = CLIENT.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -163,6 +165,45 @@ class DocumentAI:
                                 f"'amount': (just number), "
                                 f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
                                 f"'reference': User's (number),  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': Customer's name, "
+                                f"  'rfc': 'NA', " 
+                                f"  'account': account number(No. de cuenta), "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', "
+                                f"  'account': account number(/Ref) field, "
+                                f"  'receiver': 'NA', "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the bank receipt information.")
+        
+    def get_bank_customer_checking_deposit(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'bankCustomerCheckDeposit', "
+                                f"'date': change format from d month yyyy to YYYY-MM-DD, "
+                                f"'amount': (just number), "
+                                f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
+                                f"'reference': Reference number,  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': Customer's name, "
