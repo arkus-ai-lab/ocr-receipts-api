@@ -52,8 +52,8 @@ class DocumentAI:
             
             return document.text
         except Exception as e:
-            logging.error(e)
-            return logging.error("An error occurred while extracting text from the document.")
+            logging.exception("An error occurred while extracting text from the document")
+            return None
         
     def choose_ticket(self,text):
         try:
@@ -63,12 +63,14 @@ class DocumentAI:
           elif "Enviaste una transferencia" in text:
             return self.get_etransaction_info(text)
           elif 'Comprobante de Operacion' in text:          
-            return self.get_bank_receipt_info(text)
+            return self.get_proof_of_operation(text)
           elif 'BANCO/CLIENTE' in text:
             return self.get_bank_customer_checking_deposit(text)
+          else:
+            return logging.error("The document does not match any of the available templates.")
         except Exception as e:
             logging.error(e)
-            return logging.error("An error occurred while choosing the ticket.")
+            return None
     
     def remove_accents(self,input_str): 
         try:       
@@ -147,7 +149,7 @@ class DocumentAI:
             logging.error(e)
             return logging.error("An error occurred while getting the eTransaction information.")
     
-    def get_proof_operation(self, text):
+    def get_proof_of_operation(self, text):
         try:
             completion = CLIENT.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -160,11 +162,11 @@ class DocumentAI:
                     {
                         "role": "user",
                         "content": f"Organize the extracted data in the following JSON format: "
-                                f"'type': set to 'bankReceipt', "
+                                f"'type': set to 'proofOfOperation', "
                                 f"'date': change format from d month yyyy to YYYY-MM-DD, "
                                 f"'amount': (just number), "
                                 f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
-                                f"'reference': User's (number),  "
+                                f"'reference': User's (Usuario: number),  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': Customer's name, "
@@ -194,7 +196,7 @@ class DocumentAI:
                     {
                         "role": "system",
                         "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
-                        + "Remember to enclose the JSON in curly braces. Be careful with all fields."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
                     },
                     {
                         "role": "user",

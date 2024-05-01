@@ -2,6 +2,9 @@ import os
 from utilities.document_ai import DocumentAI
 import logging
 from utilities.config import PROJECT_SETUP
+from rest_framework.response import Response
+from rest_framework import status
+import json
 
 
 def process_documents():    
@@ -19,9 +22,6 @@ def process_documents():
             string_data_without_delimiters = documents_manager.remove_code_block_delimiters(string_data)
             json_data = documents_manager.string_to_json(string_data_without_delimiters)
             documents_manager.drop_processed_documents()
-                  
-        print(json_data)
-    except Exception as e:
-        logging.error(e)
-        return logging.error("An error occurred while processing the documents.")
+    except json.JSONDecodeError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     return json_data
