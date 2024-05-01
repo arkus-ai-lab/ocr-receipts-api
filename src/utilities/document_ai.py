@@ -52,8 +52,8 @@ class DocumentAI:
             
             return document.text
         except Exception as e:
-            logging.error(e)
-            return logging.error("An error occurred while extracting text from the document.")
+            logging.exception("An error occurred while extracting text from the document")
+            return None
         
     def choose_ticket(self,text):
         try:
@@ -62,9 +62,15 @@ class DocumentAI:
             return self.get_spei_info(text)
           elif "Enviaste una transferencia" in text:
             return self.get_etransaction_info(text)
+          elif 'Comprobante de Operacion' in text:          
+            return self.get_proof_of_operation(text)
+          elif 'BANCO/CLIENTE' in text:
+            return self.get_bank_customer_checking_deposit(text)
+          else:
+            return logging.error("The document does not match any of the available templates.")
         except Exception as e:
             logging.error(e)
-            return logging.error("An error occurred while choosing the ticket.")
+            return None
     
     def remove_accents(self,input_str): 
         try:       
@@ -143,7 +149,84 @@ class DocumentAI:
             logging.error(e)
             return logging.error("An error occurred while getting the eTransaction information.")
     
-    
+    def get_proof_of_operation(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'proofOfOperation', "
+                                f"'date': change format from d month yyyy to YYYY-MM-DD, "
+                                f"'amount': (just number), "
+                                f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
+                                f"'reference': User's (Usuario: number),  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': Customer's name, "
+                                f"  'rfc': 'NA', " 
+                                f"  'account': account number(No. de cuenta), "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', "
+                                f"  'account': account number(/Ref) field, "
+                                f"  'receiver': 'NA', "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the bank receipt information.")
+        
+    def get_bank_customer_checking_deposit(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'bankCustomerCheckDeposit', "
+                                f"'date': change format from d month yyyy to YYYY-MM-DD, "
+                                f"'amount': (just number), "
+                                f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
+                                f"'reference': Reference number,  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': Customer's name, "
+                                f"  'rfc': 'NA', " 
+                                f"  'account': account number(No. de cuenta), "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', "
+                                f"  'account': account number(/Ref) field, "
+                                f"  'receiver': 'NA', "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the bank receipt information.")
+
 
     def string_to_json(self,json_string):
         try:
