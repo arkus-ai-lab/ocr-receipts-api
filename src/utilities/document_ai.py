@@ -136,6 +136,7 @@ class DocumentAI:
                         "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
                         "(if any field is unknown, use 'NA'): 'type' set to 'eTransaction', 'date' (format: YYYY-MM-DD), "
                         "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference' (don't take the concept), 'currency', 'ordering_party' "
+                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference' (don't take the concept), 'currency', 'ordering_party' "
                         "(origin account) including 'name' (NA), 'rfc', 'account' (if only the last four numbers are available, use them, is the origin account), "
                         "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (the name of receipt), "
                         "'rfc', 'account' (if only the last four numbers are available, use them, it's closer of the receipt name), and 'receiver' (bank name). "
