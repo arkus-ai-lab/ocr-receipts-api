@@ -62,6 +62,8 @@ class DocumentAI:
             return self.get_spei_info(text)
           elif "Enviaste una transferencia" in text:
             return self.get_etransaction_info(text)
+          elif "CHEQUE" in text:
+            return self.get_check_info(text)
         except Exception as e:
             logging.error(e)
             return logging.error("An error occurred while choosing the ticket.")
@@ -127,7 +129,7 @@ class DocumentAI:
                         "Using the information extracted from the provided screenshots, you will assist the user with their queries. "
                         "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
                         "(if any field is unknown, use 'NA'): 'type' set to 'eTransaction', 'date' (format: YYYY-MM-DD), "
-                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference', 'currency', 'ordering_party' "
+                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference' (don't take the concept), 'currency', 'ordering_party' "
                         "(origin account) including 'name' (NA), 'rfc', 'account' (if only the last four numbers are available, use them, is the origin account), "
                         "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (the name of receipt), "
                         "'rfc', 'account' (if only the last four numbers are available, use them, it's closer of the receipt name), and 'receiver' (bank name). "
@@ -144,6 +146,33 @@ class DocumentAI:
             return logging.error("An error occurred while getting the eTransaction information.")
     
     
+    def get_check_info(self, result):
+        try:
+            completion = CLIENT.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an assistant specialized in handling checks. "
+                        "Your role is to distinguish between the ordering party and the beneficiary party. "
+                        "Using the information extracted from the provided scanned checks, you will assist the user with their queries. "
+                        "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
+                        "(if any field is unknown, use 'NA'): 'type' set to 'check', 'date' (format: YYYY-MM-DD, sometimes the numbers could be letters, please be intuitive, e. g. zozl might be 2022), "
+                        "'amount' (an float), 'amount_letter' (the ammount using words e. g. cien mil pesos or mil quinientos dolares), 'reference'  (Number or folio in the check e. g. 1111⑆222222222⑆33333333333⑈XXXXXXX the last 7 numbers), 'currency' (MXN or USD), 'ordering_party' "
+                        "(origin account) including 'name' (here is the name of the person who owns the issuing account), 'rfc', 'account' (the 'clabe' or similar), "
+                        "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (here is the name of the person to whom the check is addressed after 'Paguese este cheque a:' or similar, it might be company name or person name, but ignore the name of banks in this field), "
+                        "'rfc' (NA), 'account' (NA), and 'receiver' (bank name)."
+                        f"This is the text extracted from the document: {result}"
+                    )
+                },
+            ]
+                )
+            result = completion.choices[0].message.content
+            print(result)
+            return result
+        except Exception as e:
+            print(e)
 
     def string_to_json(self,json_string):
         try:
