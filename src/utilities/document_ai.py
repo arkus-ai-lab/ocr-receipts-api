@@ -159,7 +159,7 @@ class DocumentAI:
                     {
                         "role": "system",
                         "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
-                        + "Remember to enclose the JSON in curly braces. Be careful with all fields."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
                     },
                     {
                         "role": "user",
@@ -168,7 +168,7 @@ class DocumentAI:
                                 f"'date': change format from d month yyyy to YYYY-MM-DD, "
                                 f"'amount': (just number), "
                                 f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
-                                f"'reference': User's (Usuario: number),  "
+                                f"'reference': NA,  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': Customer's name, "
