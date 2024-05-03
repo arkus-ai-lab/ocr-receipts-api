@@ -68,6 +68,8 @@ class DocumentAI:
             return self.get_bank_customer_checking_deposit(text)
           elif "CHEQUE" in text:
             return self.get_check_info(text)
+          elif "ESTADO DE CUENTA NOMINA" in text:
+            return self.get_payroll_info(text)
           else:
             return logging.error("The document does not match any of the available templates.")
         except Exception as e:
@@ -257,6 +259,46 @@ class DocumentAI:
         except Exception as e:
             print(e)
 
+    def get_payroll_info(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'payrollReceipt', "
+                                f"'date': (cutoff date) change format from d month yyyy to YYYY-MM-DD, "
+                                f"'amount': ending balance (just number), "
+                                f"'ammount_letter':(for example: 'mil doscientos pesos'), "
+                                f"'reference': NA,  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': Customer's name, "
+                                f"  'rfc': 'R.F.C' of the ordering party (person's R.F.C), "  
+                                f"  'account': account number, "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', "
+                                f"  'account': NA, "
+                                f"  'receiver': 'NA', "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the payroll information.")
+
+    
     def string_to_json(self,json_string):
         try:
             return json.loads(json_string)
