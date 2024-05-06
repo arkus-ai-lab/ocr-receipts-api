@@ -7,6 +7,8 @@ from openai import OpenAI
 from utilities.config import OPENAI_API_KEY
 import json 
 import re
+import img2pdf
+from PIL import Image
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
 CLIENT = OpenAI(api_key= OPENAI_API_KEY)
@@ -25,12 +27,48 @@ class DocumentAI:
                 if document.endswith(".pdf"):
                     complete_path = os.path.join('utilities/documents/', document)
                     docs_path.append(complete_path) 
-            print(docs_path)        
+            print(docs_path)
             return docs_path
         except Exception as e:
             logging.error(e)
             return logging.error("No documents found in the directory.")    
    
+    def convert_image_to_pdf(self):
+        try:    
+            for image in os.listdir('utilities/documents/'):
+                if image.endswith(".jpg"):
+                    complete_path = os.path.join('utilities/documents/', image)
+                    image = Image.open(complete_path)
+                    pdf_path = complete_path.replace(".jpg", ".pdf")
+                    pdf_bytes = img2pdf.convert(image.filename)
+                    with open(pdf_path, "wb") as pdf_file:
+                        pdf_file.write(pdf_bytes)
+                        image.close()
+                        pdf_file.close()
+                elif image.endswith(".jpeg"):
+                    complete_path = os.path.join('utilities/documents/', image)
+                    image = Image.open(complete_path)
+                    pdf_path = complete_path.replace(".jpeg", ".pdf")
+                    pdf_bytes = img2pdf.convert(image.filename)
+                    with open(pdf_path, "wb") as pdf_file:
+                        pdf_file.write(pdf_bytes)
+                        image.close()
+                        pdf_file.close()
+                elif image.endswith(".png"):
+                    complete_path = os.path.join('utilities/documents/', image)
+                    image = Image.open(complete_path)
+                    pdf_path = complete_path.replace(".png", ".pdf")
+                    pdf_bytes = img2pdf.convert(image.filename)
+                    with open(pdf_path, "wb") as pdf_file:
+                        pdf_file.write(pdf_bytes)
+                        image.close()
+                        pdf_file.close()
+                else:
+                    logging.error("The document is not an image.")
+                    return logging.error("The document is not an image.")
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while converting the image to PDF.")
 
     def extract_text(self, docs_path):
         try:
@@ -305,9 +343,8 @@ class DocumentAI:
     def drop_processed_documents(self):
         try:
             for document in os.listdir('utilities/documents/'):
-                if document.endswith(".pdf"):
-                    complete_path = os.path.join('utilities/documents/', document)
-                    os.remove(complete_path) 
+                complete_path = os.path.join('utilities/documents/', document)
+                os.remove(complete_path) 
             return None
         except Exception as e:
             logging.error(e)
