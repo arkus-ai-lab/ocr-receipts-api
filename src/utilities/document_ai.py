@@ -66,10 +66,10 @@ class DocumentAI:
             return self.get_proof_of_operation(text)
           elif 'BANCO/CLIENTE' in text:
             return self.get_bank_customer_checking_deposit(text)
-          elif "CHEQUE" in text:
-            return self.get_check_info(text)
-          elif "ESTADO DE CUENTA NOMINA" in text:
+          elif "ESTADO DE CUENTA NOMINA" or "LIBRETON NOMINA" in text:
             return self.get_payroll_info(text)
+          elif "CHEQUE" in text:
+            return self.get_check_info(text)          
           else:
             return logging.error("The document does not match any of the available templates.")
         except Exception as e:
@@ -273,9 +273,9 @@ class DocumentAI:
                         "role": "user",
                         "content": f"Organize the extracted data in the following JSON format: "
                                 f"'type': set to 'payrollReceipt', "
-                                f"'date': (cutoff date) change format from d month yyyy to YYYY-MM-DD, "
-                                f"'amount': ending balance (just number), "
-                                f"'ammount_letter':(for example: 'mil doscientos pesos'), "
+                                f"'date': NA, "
+                                f"'amount': NA, "
+                                f"'ammount_letter': NA, "
                                 f"'reference': NA,  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
@@ -354,4 +354,8 @@ class DocumentAI:
             return None
         except Exception as e:
             logging.error(e)
-            return logging.error("An error occurred while dropping processed documents.") 
+            return logging.error("An error occurred while dropping processed documents.")
+        
+
+    
+    
