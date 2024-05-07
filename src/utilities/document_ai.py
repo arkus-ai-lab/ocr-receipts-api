@@ -244,7 +244,7 @@ class DocumentAI:
                         "Using the information extracted from the provided scanned checks, you will assist the user with their queries. "
                         "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
                         "(if any field is unknown, use 'NA'): 'type' set to 'check', 'date' (format: YYYY-MM-DD, sometimes the numbers could be letters, please be intuitive, e. g. zozl might be 2022), "
-                        "'amount' (an float), 'amount_letter' (the ammount using words e. g. cien mil pesos or mil quinientos dolares), 'reference'  (Number or folio in the check e. g. 1111⑆222222222⑆33333333333⑈XXXXXXX the last 7 numbers), 'currency' (MXN or USD), 'ordering_party' "
+                        "'amount' (an float), 'amount_letter' (the ammount using words e. g. cien mil pesos or mil quinientos dolares), 'reference'  (Number or folio in the check e. g. 1111⑆222222222⑆33333333333⑈XXXXXXX the last 7 numbers) and always is string, 'currency' (MXN or USD), 'ordering_party' "
                         "(origin account) including 'name' (here is the name of the person who owns the issuing account), 'rfc', 'account' (the 'clabe' or similar), "
                         "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (here is the name of the person to whom the check is addressed after 'Paguese este cheque a:' or similar, it might be company name or person name, but ignore the name of banks in this field), "
                         "'rfc' (NA), 'account' (NA), and 'receiver' (bank name)."
@@ -293,7 +293,10 @@ class DocumentAI:
     
     def string_to_json(self,json_string):
         try:
-            return json.loads(json_string)
+            data = json.loads(json_string)
+            result_json = json.dumps(data, ensure_ascii=False, indent=4)
+            print(result_json)
+            return json.loads(result_json)
         except json.JSONDecodeError as e:
             return f"Error decoding JSON: {e}"
         
