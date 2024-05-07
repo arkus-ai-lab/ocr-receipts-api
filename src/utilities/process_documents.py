@@ -14,6 +14,7 @@ def process_documents():
     endpoint = PROJECT_SETUP["endpoint"]     
     try:
         documents_manager = DocumentAI(project_id, location, processor_id, endpoint)
+        documents = documents_manager.convert_image_to_pdf()
         documents = documents_manager.get_documents()
         document_text = ''
         for document in documents:
