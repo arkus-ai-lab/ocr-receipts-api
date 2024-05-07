@@ -87,7 +87,7 @@ class DocumentAI:
                 raw_document=raw_document)
             response = client.process_document(request=request)
             document = response.document
-            
+            print(document.text)
             return document.text
         except Exception as e:
             logging.exception("An error occurred while extracting text from the document")
@@ -96,7 +96,7 @@ class DocumentAI:
     def choose_ticket(self,text):
         try:
           text = self.remove_accents(text)
-          if "SPEIR" in text:
+          if "SISTEMA DE PAGOS" in text:
             return self.get_spei_info(text)
           elif "Enviaste una transferencia" in text:
             return self.get_etransaction_info(text)
@@ -137,17 +137,17 @@ class DocumentAI:
                                 f"'date': 'Date of credit to the beneficiary account' (change format from d month yyyy to YYYY-MM-DD), "
                                 f"'amount': (just number), "
                                 f"'ammount_letter':(for example: 'cien mil pesos'), "
-                                f"'reference': 'reference' is Numeric reference' and NOT the 'Concept of payment',  "
+                                f"'reference': 'reference' is Numeric reference' and NOT the 'Concept of payment', it must be a string,  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': (Account holder of the ordering party, please do not include the name of 'Issuing institution of the payment')', "
                                 f"  'rfc': 'RFC/CURP' of the ordering party (person's RFC or CURP), " 
-                                f"  'account': '(which is the CLABE/IBAN of ordering party)', "
+                                f"  'account': '(which is the CLABE/IBAN of ordering party)'it must be a string, "
                                 f"  'issuer': bank name, "
                                 f"'beneficiary_party' with fields: \n"
                                 f"  'name': beneficiary name, "
                                 f"  'rfc': 'RFC/CURP' of beneficiary bank, "
-                                f"  'account': (beneficiary CLABE/IBAN)', "
+                                f"  'account': (beneficiary CLABE/IBAN)' it must be a string, "
                                 f"  'receiver': beneficiary bank name, "
                                 f"This is the text extracted from the document: {text}"
                     },
@@ -173,10 +173,10 @@ class DocumentAI:
                         "Using the information extracted from the provided screenshots, you will assist the user with their queries. "
                         "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
                         "(if any field is unknown, use 'NA'): 'type' set to 'eTransaction', 'date' (format: YYYY-MM-DD), "
-                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference', 'currency', 'ordering_party' "
-                        "(origin account) including 'name' (NA), 'rfc', 'account' (if only the last four numbers are available, use them, is the origin account), "
+                        "'amount' (an integer), 'amount_letter' (the ammount using words), 'reference' it must be a string, 'currency', 'ordering_party' "
+                        "(origin account) including 'name' (NA), 'rfc', 'account' (if only the last four numbers are available, use them, is the origin account, it must be a string), "
                         "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (the name of receipt), "
-                        "'rfc', 'account' (if only the last four numbers are available, use them, it's closer of the receipt name), and 'receiver' (bank name). "
+                        "'rfc', 'account' (if only the last four numbers are available, use them, it's closer of the receipt name, it must be a string), and 'receiver' (bank name). "
                         f"This is the text extracted from the document: {result}"
                     )
                 },
@@ -211,12 +211,12 @@ class DocumentAI:
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': Customer's name, "
                                 f"  'rfc': 'NA', " 
-                                f"  'account': account number(No. de cuenta), "
+                                f"  'account': account number(No. de cuenta) it must be a string, "
                                 f"  'issuer': bank name, "
                                 f"'beneficiary_party' with fields: \n"
                                 f"  'name': 'NA', "
                                 f"  'rfc': 'NA', "
-                                f"  'account': account number(/Ref) field, "
+                                f"  'account': account number(/Ref) field, it must be a string, "
                                 f"  'receiver': 'NA', "
                                 f"This is the text extracted from the document: {text}"
                     },
@@ -245,17 +245,17 @@ class DocumentAI:
                                 f"'date': change format from d month yyyy to YYYY-MM-DD, "
                                 f"'amount': (just number), "
                                 f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
-                                f"'reference': Reference number,  "
+                                f"'reference': Reference number, it must be a string,  "
                                 f"'currency': it might be 'MXN' or 'USD', "
                                 f"'ordering_party' with fields: \n"                                
                                 f"  'name': Customer's name, "
                                 f"  'rfc': 'NA', " 
-                                f"  'account': account number(No. de cuenta), "
+                                f"  'account': account number(No. de cuenta), it must be a string, "
                                 f"  'issuer': bank name, "
                                 f"'beneficiary_party' with fields: \n"
                                 f"  'name': 'NA', "
                                 f"  'rfc': 'NA', "
-                                f"  'account': account number(/Ref) field, "
+                                f"  'account': account number(/Ref) field, it must be a string, "
                                 f"  'receiver': 'NA', "
                                 f"This is the text extracted from the document: {text}"
                     },
@@ -280,8 +280,8 @@ class DocumentAI:
                         "Using the information extracted from the provided scanned checks, you will assist the user with their queries. "
                         "Be cautious with the information handling. The user requires a JSON object (but like a string) with the following fields "
                         "(if any field is unknown, use 'NA'): 'type' set to 'check', 'date' (format: YYYY-MM-DD, sometimes the numbers could be letters, please be intuitive, e. g. zozl might be 2022), "
-                        "'amount' (an float), 'amount_letter' (the ammount using words e. g. cien mil pesos or mil quinientos dolares), 'reference'  (Number or folio in the check e. g. 1111⑆222222222⑆33333333333⑈XXXXXXX the last 7 numbers), 'currency' (MXN or USD), 'ordering_party' "
-                        "(origin account) including 'name' (here is the name of the person who owns the issuing account), 'rfc', 'account' (the 'clabe' or similar), "
+                        "'amount' (an float), 'amount_letter' (the ammount using words e. g. cien mil pesos or mil quinientos dolares), 'reference'  (Number or folio in the check e. g. 1111⑆222222222⑆33333333333⑈XXXXXXX the last 7 numbers) it must be a string, 'currency' (MXN or USD), 'ordering_party' "
+                        "(origin account) including 'name' (here is the name of the person who owns the issuing account), 'rfc', 'account' (the 'clabe' or similar) it must be a string, "
                         "and 'issuer' (bank name). 'beneficiary_party' (details of the receiver) including 'name' (here is the name of the person to whom the check is addressed after 'Paguese este cheque a:' or similar, it might be company name or person name, but ignore the name of banks in this field), "
                         "'rfc' (NA), 'account' (NA), and 'receiver' (bank name)."
                         f"This is the text extracted from the document: {result}"
