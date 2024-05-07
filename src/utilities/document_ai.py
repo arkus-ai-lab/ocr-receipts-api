@@ -66,9 +66,9 @@ class DocumentAI:
             return self.get_proof_of_operation(text)
           elif 'BANCO/CLIENTE' in text:
             return self.get_bank_customer_checking_deposit(text)          
-          elif "CHEQUE " in text:
+          elif "PAGUESE " in text:
             return self.get_check_info(text)
-          elif "ESTADO DE CUENTA NOMINA" or "LIBRETON NOMINA" in text:
+          elif "ESTADO DE CUENTA NOMINA" or "LIBRETON NOMINA" or "CUENTA DE CHEQUES" in text:
             return self.get_payroll_info(text)          
           else:
             return logging.error("The document does not match any of the available templates.")
