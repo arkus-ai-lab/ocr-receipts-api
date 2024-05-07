@@ -103,9 +103,11 @@ class DocumentAI:
           elif 'Comprobante de Operacion' in text:          
             return self.get_proof_of_operation(text)
           elif 'BANCO/CLIENTE' in text:
-            return self.get_bank_customer_checking_deposit(text)
-          elif "CHEQUE" in text:
+            return self.get_bank_customer_checking_deposit(text)          
+          elif "PAGUESE " in text:
             return self.get_check_info(text)
+          elif "ESTADO DE CUENTA NOMINA" or "LIBRETON NOMINA" or "CUENTA DE CHEQUES" in text:
+            return self.get_payroll_info(text)          
           else:
             return logging.error("The document does not match any of the available templates.")
         except Exception as e:
@@ -290,21 +292,56 @@ class DocumentAI:
             ]
                 )
             result = completion.choices[0].message.content
-            print(result)
             return result
         except Exception as e:
             print(e)
 
+    def get_payroll_info(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'payrollReceipt', "                                
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': Customer's name, "
+                                f"  'rfc': 'R.F.C' of the ordering party (person's R.F.C), "  
+                                f"  'account': account number 'NO. DE CUENTA' e.g xx-xxxxxxxx-x or with length max of 11, "
+                                f"  'issuer': bank name, "
+                                f"  'clabe': which is the 'CLABE'/IBAN of ordering party"                                
+                                f""
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the payroll information.")
+
+    
     def string_to_json(self,json_string):
         try:
-            return json.loads(json_string)
+            data = json.loads(json_string)
+            result_json = json.dumps(data, ensure_ascii=False, indent=4)
+            print(result_json)
+            return json.loads(result_json)
         except json.JSONDecodeError as e:
             return f"Error decoding JSON: {e}"
         
     def remove_code_block_delimiters(self, json_string):
         try:
             clean_string = re.sub(r'```json|```', '', json_string)
-            print(clean_string)
+            print("clean_string",clean_string)
             return clean_string
         except Exception as e:
             logging.error(e)
@@ -348,4 +385,8 @@ class DocumentAI:
             return None
         except Exception as e:
             logging.error(e)
-            return logging.error("An error occurred while dropping processed documents.") 
+            return logging.error("An error occurred while dropping processed documents.")
+        
+
+    
+    
