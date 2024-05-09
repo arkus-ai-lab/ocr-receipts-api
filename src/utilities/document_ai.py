@@ -149,7 +149,7 @@ class DocumentAI:
                                 f"'beneficiary_party' with fields: \n"
                                 f"  'name': beneficiary name, "
                                 f"  'rfc': 'RFC/CURP' of the beneficiary party (beneficiary bank RFC or CURP), "
-                                f"  'account': beneficiary 'CLABE/IBAN' it must be a string, "
+                                f"  'account': 'CLABE/IBAN' of the beneficiary which must be a string, "
                                 f"  'receiver': beneficiary bank name, "
                                 f"This is the text extracted from the document: {text}"
                     },
