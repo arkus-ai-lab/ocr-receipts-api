@@ -12,6 +12,8 @@ from utilities.process_documents import process_documents
 class OCRTextView(generics.GenericAPIView):
     """   
         Handle POST Adds a new PDF, jpeg, jpg or png source to the OCR Text API.
+        Remember that the OCR Text API can only process one file at a time and one
+        ticket per page.
                             
     """
     parser_classes = (MultiPartParser, FormParser)
