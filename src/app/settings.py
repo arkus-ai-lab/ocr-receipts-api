@@ -129,9 +129,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -151,5 +150,6 @@ SPECTACULAR_SETTINGS = {
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY ='pk_test_51LvPuWGKex0FhnSWR443AQq9fPnWv5l3OcZRvAQKFgSivDWcDiPVBUBBjEkkIkA9wP5mBXLGVAqkQDajREQcHuHs00c7g2p1nF'
+STRIPE_SECRET_KEY = 'sk_test_51LvPuWGKex0FhnSW7g4fEf31ADaxNI4Kh31BGHbkKhJ8n8ckPW15DulAkIInmvrVqnXsOako6sgQ1DUzRKO8x2BK00o4uc2ieM'
+
