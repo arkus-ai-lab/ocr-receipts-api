@@ -96,7 +96,9 @@ class DocumentAI:
     def choose_ticket(self,text):
         try:
           text = self.remove_accents(text)
-          if "SISTEMA DE PAGOS" in text:
+          if "VENTA" in text:
+              return self.get_sale_info(text)
+          elif "SISTEMA DE PAGOS" in text:
             return self.get_spei_info(text)
           elif "Enviaste una transferencia" in text:
             return self.get_etransaction_info(text)
@@ -105,9 +107,9 @@ class DocumentAI:
           elif 'BANCO/CLIENTE' in text:
             return self.get_bank_customer_checking_deposit(text)          
           elif "PAGUESE " in text:
-            return self.get_check_info(text)
+            return self.get_check_info(text)          
           elif "LIBRETON NOMINA" or "CUENTA DE CHEQUES" or "ESTADO DE CUENTA" in text:
-            return self.get_payroll_info(text)          
+            return self.get_payroll_info(text)                  
           else:
             return logging.error("The document does not match any of the available templates.")
         except Exception as e:
@@ -327,6 +329,46 @@ class DocumentAI:
         except Exception as e:
             logging.error(e)
             return logging.error("An error occurred while getting the payroll information.")
+        
+    def get_sale_info(self, text):
+        try:
+            completion = CLIENT.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that extracts and structures data from Spanish financial documents into JSON format for both the ordering and beneficiary parties."
+                        + "Remember to enclose the JSON in curly braces. Be careful with all fields and do not include trademark/registered symbols."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Organize the extracted data in the following JSON format: "
+                                f"'type': set to 'SaleReceipt', "
+                                f"'date': it must change format from d month yyyy to YYYY-MM-DD, "
+                                f"'amount': (just number), "
+                                f"'ammount_letter':(for example: 'mil doscientos dolares Americanos'), "
+                                f"'reference': Reference number, it must be a string,  "
+                                f"'currency': it might be 'MXN' or 'USD', "
+                                f"'ordering_party' with fields: \n"                                
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', " 
+                                f"  'account': card number(Numero de tarjeta), it must be a string e.g ************0423, "
+                                f"  'issuer': bank name, "
+                                f"'beneficiary_party' with fields: \n"
+                                f"  'name': 'NA', "
+                                f"  'rfc': 'NA', "
+                                f"  'account': 'NA', "
+                                f"  'receiver': 'NA', "
+                                f"This is the text extracted from the document: {text}"
+                    },
+                ]
+            )
+            result = completion.choices[0].message.content
+            return result
+        except Exception as e:
+            logging.error(e)
+            return logging.error("An error occurred while getting the sale information.")
+
 
     
     def string_to_json(self,json_string):
